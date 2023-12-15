@@ -136,7 +136,7 @@ fun MenuScreen(
                         ) {
                             Text(
                                 text = stringResource(menuItem.titleResId),
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleLarge
                             )
                             Text(
                                 text = stringResource(menuItem.descriptionResId),
