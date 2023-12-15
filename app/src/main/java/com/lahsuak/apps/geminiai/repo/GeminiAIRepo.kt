@@ -9,6 +9,6 @@ interface GeminiAIRepo {
 
     fun getGenerativeModel(
         config: GenerationConfig,
-        setting: List<SafetySetting>? = null,
+        safetySetting: List<SafetySetting>? = null,
     ): GenerativeModel
 }
