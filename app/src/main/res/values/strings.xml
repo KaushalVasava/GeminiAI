@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Gemini AI</string>
+    <string name="action_go">Go</string>
+    <string name="action_try">Try it</string>
+
+    <!-- Menu strings -->
+    <string name="menu_summarize_title">Generate text from text-only input</string>
+    <string name="menu_summarize_description">Sample app that summarizes text</string>
+    <string name="menu_reason_title">Generate text from text-and-image input (multimodal)</string>
+    <string name="menu_reason_description">Sample app for uploading images and asking about them</string>
+    <string name="menu_chat_title">Build multi-turn conversations (chat)</string>
+    <string name="menu_chat_description">Sample app demonstrating a conversational UI</string>
+
+    <!-- Summarize sample strings -->
+    <string name="summarize_label">Text</string>
+    <string name="summarize_hint">Enter text to summarize</string>
+
+    <!-- Photo Reasoning sample strings -->
+    <string name="reason_label">Question</string>
+    <string name="reason_hint">Upload an image and then ask a question</string>
+    <string name="add_image">Add Image</string>
+
+    <!-- Chat sample strings -->
+    <string name="chat_label">Message</string>
+    <string name="action_send">Send</string>
+    <string name="back">back</string>
+    <string name="chat_ai">Chat AI</string>
+    <string name="photo_generative_ai">Photo Generative AI</string>
+    <string name="text_generative_ai">Text Generative AI</string>
+    <string name="clear_chat">Clear chat</string>
+    <string name="speech_not_support">Speech not supported</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_chat">Clear chat history</string>
+    <string name="confirm_delete">Do you want to delete all chat?</string>
+</resources>
