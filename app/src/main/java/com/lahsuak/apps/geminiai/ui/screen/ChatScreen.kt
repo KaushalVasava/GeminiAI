@@ -1,11 +1,14 @@
 package com.lahsuak.apps.geminiai.ui.screen
 
 import android.app.Activity
+import android.content.Intent
 import android.speech.RecognizerIntent
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
@@ -58,7 +62,10 @@ import com.lahsuak.apps.geminiai.ui.component.RoundedTextField
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
 import com.lahsuak.apps.geminiai.ui.model.Role
 import com.lahsuak.apps.geminiai.ui.viewmodel.ChatViewModel
+import com.lahsuak.apps.geminiai.util.setClipboard
+import com.lahsuak.apps.geminiai.util.shareText
 import com.lahsuak.apps.geminiai.util.speakToAdd
+import com.lahsuak.apps.geminiai.util.textToSpeech
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +77,20 @@ internal fun ChatRoute(
     val chatUiState by chatViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+//    var userMessageVoice by rememberSaveable {
+//        mutableStateOf("")
+//    }
+    var userMessage by rememberSaveable { mutableStateOf("") }
+
+    val speakLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            userMessage =
+                data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.get(0) ?: ""
+        }
+    }
 
     var openDialog by rememberSaveable {
         mutableStateOf(false)
@@ -127,6 +148,11 @@ internal fun ChatRoute(
                 onSendMessage = { inputText ->
                     chatViewModel.sendMessage(inputText)
                 },
+                speakLauncher = speakLauncher,
+                userMessage = userMessage,
+                onValueChange = {
+                    userMessage = it
+                },
                 resetScroll = {
                     coroutineScope.launch {
                         listState.scrollToItem(0)
@@ -165,6 +191,7 @@ fun ChatList(
 fun ChatBubbleItem(
     chatMessage: ChatMessage,
 ) {
+    val context = LocalContext.current
     val isModelMessage = chatMessage.participant == Role.MODEL ||
             chatMessage.participant == Role.ERROR
 
@@ -221,10 +248,43 @@ fun ChatBubbleItem(
                             )
                         )
                 ) {
-                    Text(
-                        text = chatMessage.text,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Column {
+                        Text(
+                            text = chatMessage.text,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        if (isModelMessage) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                IconButton(onClick = {
+                                    context.textToSpeech(chatMessage.text)
+                                }) {
+                                    Icon(
+                                        painterResource(id = R.drawable.ic_speak),
+                                        contentDescription = stringResource(R.string.share)
+                                    )
+                                }
+                                IconButton(onClick = {
+                                    context.shareText(chatMessage.text)
+                                }) {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = stringResource(R.string.share)
+                                    )
+                                }
+                                IconButton(onClick = {
+                                    context.setClipboard(chatMessage.text)
+                                }) {
+                                    Icon(
+                                        painterResource(id = R.drawable.ic_copy),
+                                        contentDescription = stringResource(R.string.copy)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -234,19 +294,12 @@ fun ChatBubbleItem(
 @Composable
 fun MessageInput(
     onSendMessage: (String) -> Unit,
+    speakLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    userMessage: String,
+    onValueChange: (String) -> Unit,
     resetScroll: () -> Unit = {},
 ) {
-    var userMessage by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
-    val speakLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            userMessage =
-                data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.get(0) ?: ""
-        }
-    }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
@@ -260,7 +313,7 @@ fun MessageInput(
             RoundedTextField(
                 value = userMessage,
                 placeholder = { Text(stringResource(R.string.chat_label)) },
-                onValueChange = { userMessage = it },
+                onValueChange = { onValueChange(it) },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                 ),
@@ -282,7 +335,7 @@ fun MessageInput(
                 onClick = {
                     if (userMessage.isNotBlank()) {
                         onSendMessage(userMessage)
-                        userMessage = ""
+                        onValueChange("")
                         resetScroll()
                     }
                 },

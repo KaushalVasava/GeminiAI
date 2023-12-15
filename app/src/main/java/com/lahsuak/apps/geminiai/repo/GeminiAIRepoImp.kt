@@ -21,7 +21,7 @@ class GeminiAIRepoImpl : GeminiAIRepo {
             modelName = "gemini-pro",
             apiKey = BuildConfig.API_KEY,
             generationConfig = config,
-            safetySettings = safetySetting,
+            safetySettings = safetySetting
         )
     }
 }
