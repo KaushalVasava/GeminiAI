@@ -65,7 +65,7 @@ import com.lahsuak.apps.geminiai.ui.viewmodel.ChatViewModel
 import com.lahsuak.apps.geminiai.util.setClipboard
 import com.lahsuak.apps.geminiai.util.shareText
 import com.lahsuak.apps.geminiai.util.speakToAdd
-import com.lahsuak.apps.geminiai.util.textToSpeech
+import com.lahsuak.apps.geminiai.util.toCamelCase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,9 +77,7 @@ internal fun ChatRoute(
     val chatUiState by chatViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-//    var userMessageVoice by rememberSaveable {
-//        mutableStateOf("")
-//    }
+
     var userMessage by rememberSaveable { mutableStateOf("") }
 
     val speakLauncher = rememberLauncherForActivityResult(
@@ -192,22 +190,22 @@ fun ChatBubbleItem(
     chatMessage: ChatMessage,
 ) {
     val context = LocalContext.current
-    val isModelMessage = chatMessage.participant == Role.MODEL ||
+    val isGEMINIMessage = chatMessage.participant == Role.GEMINI ||
             chatMessage.participant == Role.ERROR
 
     val backgroundColor = when (chatMessage.participant) {
-        Role.MODEL -> MaterialTheme.colorScheme.primaryContainer
-        Role.USER -> MaterialTheme.colorScheme.tertiaryContainer
+        Role.GEMINI -> MaterialTheme.colorScheme.primaryContainer
+        Role.YOU -> MaterialTheme.colorScheme.tertiaryContainer
         Role.ERROR -> MaterialTheme.colorScheme.errorContainer
     }
 
-    val bubbleShape = if (isModelMessage) {
+    val bubbleShape = if (isGEMINIMessage) {
         RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
     } else {
         RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
     }
 
-    val horizontalAlignment = if (isModelMessage) {
+    val horizontalAlignment = if (isGEMINIMessage) {
         Alignment.Start
     } else {
         Alignment.End
@@ -219,7 +217,7 @@ fun ChatBubbleItem(
             .fillMaxWidth()
     ) {
         Text(
-            text = chatMessage.participant.name,
+            text = chatMessage.participant.name.toCamelCase(),
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(bottom = 4.dp)
         )
@@ -232,7 +230,7 @@ fun ChatBubbleItem(
                     modifier = Modifier
                         .padding(1.dp)
                         .widthIn(0.dp, maxWidth * 0.9f),
-                    gradient = if (chatMessage.isPending && chatMessage.participant == Role.USER)
+                    gradient = if (chatMessage.isPending && chatMessage.participant == Role.YOU)
                         Brush.linearGradient(
                             listOf(
                                 Color.Blue.copy(0.7f),
@@ -253,19 +251,11 @@ fun ChatBubbleItem(
                             text = chatMessage.text,
                             modifier = Modifier.padding(16.dp)
                         )
-                        if (isModelMessage) {
+                        if (isGEMINIMessage) {
                             Row(
                                 Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.End
                             ) {
-                                IconButton(onClick = {
-                                    context.textToSpeech(chatMessage.text)
-                                }) {
-                                    Icon(
-                                        painterResource(id = R.drawable.ic_speak),
-                                        contentDescription = stringResource(R.string.share)
-                                    )
-                                }
                                 IconButton(onClick = {
                                     context.shareText(chatMessage.text)
                                 }) {
@@ -323,7 +313,7 @@ fun MessageInput(
                     }) {
                         Icon(
                             painterResource(R.drawable.ic_voice),
-                            "voice"
+                            "Speak"
                         )
                     }
                 },

@@ -27,7 +27,7 @@ class ChatViewModel(
             // Map the initial messages
             ChatMessage(
                 text = content.parts.first().asTextOrNull() ?: "",
-                participant = if (content.role == "user") Role.USER else Role.MODEL,
+                participant = if (content.role == "user") Role.YOU else Role.GEMINI,
                 isPending = false
             )
         }))
@@ -53,7 +53,7 @@ class ChatViewModel(
 
         val record = ChatMessage(
             text = userMessage,
-            participant = Role.USER,
+            participant = Role.YOU,
             isPending = true
         )
 
@@ -85,7 +85,7 @@ class ChatViewModel(
                     chatRepository.insertSingleMessage(
                         ChatMessage(
                             text = modelResponse,
-                            participant = Role.MODEL,
+                            participant = Role.GEMINI,
                             isPending = false
                         ).toChatMessageEntity()
                     )
