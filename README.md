@@ -5,10 +5,11 @@ Download App from apk folder.
 ![ic_launcher-playstore](https://github.com/KaushalVasava/GeminiAI/assets/49050597/2a9fab2b-659d-4d3d-a72d-19054a4dce66)
 
 # Features
-- Generate information from Text only input
-- Get information from Photo(s)
-- Get inforamtion in convertational format.
-- Simple Clean UI with Animatations
+- Generate information from Text input 
+- Get information from Photo(s) 
+- Get information in a conversational format
+- Simple Clean UI with Animations
+- Voice input for AI Chat
 
 # Technologies:
 - Kotlin 
