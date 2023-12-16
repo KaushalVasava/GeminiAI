@@ -17,7 +17,10 @@ class SummarizeViewModel(
         MutableStateFlow(SummarizeUiState.Initial)
     val uiState: StateFlow<SummarizeUiState> =
         _uiState.asStateFlow()
-    private val generativeModel = geminiAIRepo.getGenerativeModel(geminiAIRepo.provideConfig())
+    private val generativeModel = geminiAIRepo.getGenerativeModel(
+        "gemini-pro",
+        geminiAIRepo.provideConfig()
+    )
 
     fun summarize(inputText: String) {
         _uiState.value = SummarizeUiState.Loading

@@ -18,7 +18,10 @@ class ChatViewModel(
     geminiAIRepo: GeminiAIRepo,
     private val chatRepository: ChatRepository,
 ) : ViewModel() {
-    private val generativeModel = geminiAIRepo.getGenerativeModel(geminiAIRepo.provideConfig())
+    private val generativeModel = geminiAIRepo.getGenerativeModel(
+        "gemini-pro",
+        geminiAIRepo.provideConfig()
+    )
     private val chat =
         generativeModel.startChat()
 
@@ -48,6 +51,7 @@ class ChatViewModel(
             _uiState.value = ChatUiState()
         }
     }
+
     fun sendMessage(userMessage: String) {
         // Add a pending message
 

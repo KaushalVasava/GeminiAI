@@ -37,4 +37,5 @@
     <string name="copy">Copy answer</string>
     <string name="text_copied">Answer copied</string>
     <string name="share_by">Share by</string>
+    <string name="remove_image">Remove image</string>
 </resources>

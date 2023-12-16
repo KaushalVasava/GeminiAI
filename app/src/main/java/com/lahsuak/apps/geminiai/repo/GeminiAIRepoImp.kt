@@ -14,11 +14,12 @@ class GeminiAIRepoImpl : GeminiAIRepo {
     }
 
     override fun getGenerativeModel(
+        modelName: String,
         config: GenerationConfig,
         safetySetting: List<SafetySetting>?,
     ): GenerativeModel {
         return GenerativeModel(
-            modelName = "gemini-pro",
+            modelName = modelName,
             apiKey = BuildConfig.API_KEY,
             generationConfig = config,
             safetySettings = safetySetting
