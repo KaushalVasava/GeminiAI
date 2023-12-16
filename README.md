@@ -13,7 +13,7 @@ Download App from apk folder.
 # Technologies:
 - Kotlin 
 - Jetpack Compose for UI development
-- Koin for Dependecy Injection
+- Koin for Dependency Injection
 - Room library to Store chats
 - Coil for Image loading
 - Generative AI for All AI related stuff
