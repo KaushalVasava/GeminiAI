@@ -23,7 +23,7 @@ class PhotoReasoningViewModel(
 
     fun reason(
         userInput: String,
-        selectedImages: List<Bitmap>
+        selectedImages: List<Bitmap>,
     ) {
         _uiState.value = PhotoReasoningUiState.Loading
         val prompt = "Look at the image(s), and then answer the following question: $userInput"
@@ -38,7 +38,10 @@ class PhotoReasoningViewModel(
                 }
 
                 var outputContent = ""
-                val generativeModel = geminiAIRepo.getGenerativeModel(geminiAIRepo.provideConfig())
+                val generativeModel = geminiAIRepo.getGenerativeModel(
+                    "gemini-pro-vision",
+                    geminiAIRepo.provideConfig()
+                )
                 generativeModel.generateContentStream(inputContent)
                     .collect { response ->
                         outputContent += response.text
