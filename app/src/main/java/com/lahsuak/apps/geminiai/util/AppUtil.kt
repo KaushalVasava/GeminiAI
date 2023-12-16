@@ -5,9 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.speech.RecognizerIntent
-import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
@@ -22,18 +20,6 @@ fun Context.setClipboard(text: String) {
     Toast.makeText(this, this.getString(R.string.text_copied), Toast.LENGTH_SHORT).show()
 }
 
-fun Context.textToSpeech(inputText: String) {
-    var textToSpeech: TextToSpeech? = null
-    textToSpeech = TextToSpeech(this) { i ->
-        // if No error is found then only it will run
-        if (i != TextToSpeech.ERROR) {
-            // To Choose language of speech
-            textToSpeech?.setLanguage(Locale.getDefault())
-        }
-    }
-    textToSpeech.speak(inputText, TextToSpeech.QUEUE_FLUSH, null, null)
-}
-
 fun Context.shareText(text: String) {
     val intent = Intent(Intent.ACTION_SEND)
     intent.type = "text/plain"
@@ -45,6 +31,21 @@ fun Context.shareText(text: String) {
             this.getString(R.string.share_by)
         )
     )
+}
+
+fun String.toCamelCase(): String {
+    val space = " "
+    val splitedStr = this.split(space)
+    return splitedStr.joinToString(space) { str ->
+        str.lowercase().replaceFirstChar {
+            if(it.isLowerCase()){
+                val dd = it.uppercaseChar().toString()
+                dd
+            } else {
+                it.toString()
+            }
+        }
+    }
 }
 
 @SuppressLint("QueryPermissionsNeeded")
