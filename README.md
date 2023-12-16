@@ -1,4 +1,4 @@
-It is a Gemini AI application where you can get information from text, image and get info. in convertational format. 
+It is a Gemini AI application where you can get information from text, image and get info. in a conversational format. 
 
 Download App from apk folder.
 
