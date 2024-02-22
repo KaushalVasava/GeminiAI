@@ -10,18 +10,20 @@ fun ChatMessageEntity.toChatMessage(): ChatMessage {
         isPending = isPending,
         text = text,
         participant = role,
-        id = id
+        id = id,
+        imageUris = imageUris
     )
 }
 
 fun ChatMessage.toChatMessageEntity(): ChatMessageEntity {
     return ChatMessageEntity(
         id = id,
-        text = text,
         role = participant,
+        text = text,
         time = Date(),
         isMine = false,
+        isFavorite = false,
         isPending = isPending,
-        isFavorite = false
+        imageUris = imageUris
     )
 }

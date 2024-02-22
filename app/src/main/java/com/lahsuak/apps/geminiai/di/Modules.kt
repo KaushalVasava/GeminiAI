@@ -2,8 +2,6 @@ package com.lahsuak.apps.geminiai.di
 
 import com.lahsuak.apps.geminiai.data.db.ChatDatabase
 import com.lahsuak.apps.geminiai.ui.viewmodel.ChatViewModel
-import com.lahsuak.apps.geminiai.ui.viewmodel.PhotoReasoningViewModel
-import com.lahsuak.apps.geminiai.ui.viewmodel.SummarizeViewModel
 import com.lahsuak.apps.geminiai.repo.ChatRepository
 import com.lahsuak.apps.geminiai.repo.ChatRepositoryImpl
 import com.lahsuak.apps.geminiai.repo.GeminiAIRepo
@@ -19,8 +17,6 @@ val appModule = module {
 }
 
 val viewModelModule = module {
-    viewModelOf(::SummarizeViewModel)
-    viewModelOf(::PhotoReasoningViewModel)
     viewModelOf(::ChatViewModel)
 }
 val databaseModule = module {

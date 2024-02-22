@@ -10,5 +10,6 @@ data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
     var text: String = "",
     val participant: Role = Role.YOU,
-    var isPending: Boolean = false
+    var isPending: Boolean = false,
+    val imageUris: List<String>
 )
