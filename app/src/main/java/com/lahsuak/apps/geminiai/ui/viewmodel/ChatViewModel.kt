@@ -11,14 +11,13 @@ import coil.size.Precision
 import com.google.ai.client.generativeai.type.BlockThreshold
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
-import com.google.ai.client.generativeai.type.asTextOrNull
 import com.google.ai.client.generativeai.type.content
 import com.lahsuak.apps.geminiai.data.mapper.toChatMessageEntity
 import com.lahsuak.apps.geminiai.repo.ChatRepository
 import com.lahsuak.apps.geminiai.repo.GeminiAIRepo
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
-import com.lahsuak.apps.geminiai.ui.model.states.ChatUiState
 import com.lahsuak.apps.geminiai.ui.model.Role
+import com.lahsuak.apps.geminiai.ui.model.states.ChatUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,20 +36,12 @@ class ChatViewModel(
     private val chat = generativeModel.startChat()
 
     private val _uiState: MutableStateFlow<ChatUiState> =
-        MutableStateFlow(ChatUiState(chat.history.map { content ->
-            // Map the initial messages
-            ChatMessage(
-                text = content.parts.first().asTextOrNull() ?: "",
-                participant = if (content.role == "user") Role.YOU else Role.GEMINI,
-                isPending = false,
-                imageUris = emptyList()
-            )
-        }))
+        MutableStateFlow(ChatUiState(emptyList()))
     val uiState: StateFlow<ChatUiState> = _uiState
-
-    init {
-        viewModelScope.launch {
-            chatRepository.getAllChatMessages().collect {
+    
+    fun fetchChats(groupId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.getAllChatMessages(groupId).collect {
                 _uiState.value = ChatUiState(it)
             }
         }
@@ -63,7 +54,12 @@ class ChatViewModel(
         }
     }
 
-    fun sendMessage(context: Context, userMessage: String, selectedImages: List<String>) {
+    fun sendMessage(
+        context: Context,
+        userMessage: String,
+        groupId: String,
+        selectedImages: List<String>,
+    ) {
         // Add a pending message
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -91,7 +87,8 @@ class ChatViewModel(
                 text = userMessage,
                 participant = Role.YOU,
                 isPending = true,
-                imageUris = selectedImages
+                imageUris = selectedImages,
+                id = groupId
             )
 
             chatRepository.insertSingleMessage(record.toChatMessageEntity())
@@ -107,11 +104,13 @@ class ChatViewModel(
                                 text = modelResponse,
                                 participant = Role.GEMINI,
                                 isPending = false,
-                                imageUris = emptyList()
+                                imageUris = emptyList(),
+                                id = groupId
                             ).toChatMessageEntity()
                         )
                     }
-                } else {
+                }
+                else {
                     val prompt =
                         "Look at the image(s), and then answer the following question: $userMessage"
 
@@ -124,13 +123,7 @@ class ChatViewModel(
 
                     val generativeModel = geminiAIRepo.getGenerativeModel(
                         "gemini-pro-vision",
-                        geminiAIRepo.provideConfig(),
-                        safetySetting = listOf(
-                            SafetySetting(
-                                harmCategory = HarmCategory.SEXUALLY_EXPLICIT,
-                                threshold = BlockThreshold.NONE
-                            )
-                        )
+                        geminiAIRepo.provideConfig()
                     )
                     var outputContent = ""
 
@@ -139,14 +132,15 @@ class ChatViewModel(
                     generativeModel.generateContentStream(inputContent)
                         .collectLatest { response ->
                             outputContent += response.text
-                            delay(2000)
+                            delay(2000)//it is temp I will remove it
                             chatRepository.insertSingleMessage(newMessage.toChatMessageEntity())
                             chatRepository.insertSingleMessage(
                                 ChatMessage(
                                     text = outputContent,
                                     participant = Role.GEMINI,
                                     isPending = false,
-                                    imageUris = emptyList()
+                                    imageUris = emptyList(),
+                                    id = groupId
                                 ).toChatMessageEntity()
                             )
                         }
@@ -157,11 +151,12 @@ class ChatViewModel(
                     ChatMessage(
                         text = e.localizedMessage.toString(),
                         participant = Role.ERROR,
-                        imageUris = emptyList()
+                        isPending = false,
+                        imageUris = emptyList(),
+                        id = groupId
                     )
                 )
             }
         }
     }
-
 }

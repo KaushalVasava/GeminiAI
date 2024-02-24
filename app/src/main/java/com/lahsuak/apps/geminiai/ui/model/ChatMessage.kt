@@ -7,9 +7,10 @@ enum class Role {
 }
 
 data class ChatMessage(
-    val id: String = UUID.randomUUID().toString(),
+    val cId: String = UUID.randomUUID().toString(),
+    val id: String,
     var text: String = "",
     val participant: Role = Role.YOU,
     var isPending: Boolean = false,
-    val imageUris: List<String>
+    val imageUris: List<String>,
 )

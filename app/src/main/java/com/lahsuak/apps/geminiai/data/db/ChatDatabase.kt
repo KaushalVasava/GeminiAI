@@ -7,15 +7,20 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.lahsuak.apps.geminiai.data.converter.Converters
 import com.lahsuak.apps.geminiai.data.dao.ChatDao
+import com.lahsuak.apps.geminiai.data.model.ChatMessageConverters
 import com.lahsuak.apps.geminiai.data.model.ChatMessageEntity
+import com.lahsuak.apps.geminiai.data.model.GroupEntity
+import com.lahsuak.apps.geminiai.data.model.ListConverters
 
 @Database(
-    entities = [ChatMessageEntity::class],
+    entities = [GroupEntity::class, ChatMessageEntity::class],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(
-    Converters::class
+    Converters::class,
+    ListConverters::class,
+    ChatMessageConverters::class
 )
 abstract class ChatDatabase : RoomDatabase() {
     abstract val chatDao: ChatDao

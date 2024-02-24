@@ -12,7 +12,8 @@ import java.util.Date
 @Entity(tableName = "chat_table")
 @TypeConverters(ListConverters::class)
 data class ChatMessageEntity(
-    @PrimaryKey(autoGenerate = false) val id: String,
+    @PrimaryKey(autoGenerate = false) val cId: String,
+    val id: String,
     val role: Role,
     val text: String,
     val time: Date?,
@@ -22,16 +23,17 @@ data class ChatMessageEntity(
     val imageUris: List<String>,
 )
 
+
 class ListConverters {
     private var gson: Gson = Gson()
     @TypeConverter
-    fun stringToSomeObjectList(data: String): List<String> {
+    fun stringToStringList(data: String): List<String> {
         val listType = object : TypeToken<List<String>>() {}.type
         return gson.fromJson(data, listType)
     }
 
     @TypeConverter
-    fun someObjectListToString(someObjects: List<String>): String {
+    fun stringListToString(someObjects: List<String>): String {
         return gson.toJson(someObjects)
     }
 }

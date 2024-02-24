@@ -7,17 +7,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.lahsuak.apps.geminiai.ui.screen.ChatRoute
 import com.lahsuak.apps.geminiai.ui.screen.MenuScreen
 import com.lahsuak.apps.geminiai.ui.theme.GeminiAITheme
-import com.lahsuak.apps.geminiai.ui.viewmodel.ChatViewModel
+import com.lahsuak.apps.geminiai.ui.viewmodel.GroupViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-    private val chatViewModel: ChatViewModel by viewModel()
+    private val groupViewModel: GroupViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,16 +31,27 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-
-                    NavHost(navController = navController, startDestination = "chat") {
-//                        composable("menu") {
-//                            MenuScreen(onItemClicked = { routeId ->
-//                                navController.navigate(routeId)
-//                            })
-//                        }
-                        composable("chat") {
-                            ChatRoute(chatViewModel) {
-                                navController.popBackStack()
+                    NavHost(navController = navController, startDestination = "menu") {
+                        composable("menu") {
+                            MenuScreen(groupViewModel, onItemClicked = { routeId, groupId ->
+                                navController.navigate("$routeId/$groupId")
+                            })
+                        }
+                        composable(
+                            "chat/{groupId}",
+                            arguments = listOf(
+                                navArgument("groupId") {
+                                    type = NavType.StringType
+                                })
+                        ) {
+                            val groupId: String? = it.arguments?.getString("groupId")
+                            if (groupId != null) {
+                                ChatRoute(groupId) { chats ->
+                                    if (chats.isNotEmpty()) {
+                                        groupViewModel.addChatToGroup(groupId, chats)
+                                    }
+                                    navController.popBackStack()
+                                }
                             }
                         }
                     }

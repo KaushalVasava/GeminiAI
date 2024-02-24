@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -30,7 +31,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -69,17 +69,19 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.ai.sample.util.UriSaver
 import com.lahsuak.apps.geminiai.R
+import com.lahsuak.apps.geminiai.data.mapper.toChatMessageEntity
+import com.lahsuak.apps.geminiai.data.model.ChatMessageEntity
 import com.lahsuak.apps.geminiai.ui.component.AnimatedBorderCard
 import com.lahsuak.apps.geminiai.ui.component.RoundedTextField
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
@@ -90,20 +92,29 @@ import com.lahsuak.apps.geminiai.util.shareText
 import com.lahsuak.apps.geminiai.util.speakToAdd
 import com.lahsuak.apps.geminiai.util.toCamelCase
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ChatRoute(
-    chatViewModel: ChatViewModel,
-    onBackPress: () -> Unit,
+    groupId: String,
+    chatViewModel: ChatViewModel = get(),
+    onBackPress: (chats: List<ChatMessageEntity>) -> Unit,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-//    val imageRequestBuilder = ImageRequest.Builder(LocalContext.current)
-//    val imageLoader = ImageLoader.Builder(LocalContext.current).build()
     val chatUiState by chatViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     var userMessage by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(key1 = true) {
+        chatViewModel.fetchChats(groupId)
+    }
+    BackHandler {
+        val list =
+            chatViewModel.uiState.value.messages.map { it.toChatMessageEntity() }
+        onBackPress(list)
+    }
 
     val speakLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -150,13 +161,15 @@ internal fun ChatRoute(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.chat_ai)) },
-//                navigationIcon = {
-//                    IconButton(onClick = {
-//                        onBackPress()
-//                    }) {
-//                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
-//                    }
-//                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        val list =
+                            chatViewModel.uiState.value.messages.map { it.toChatMessageEntity() }
+                        onBackPress(list)
+                    }) {
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         openDialog = true
@@ -170,9 +183,13 @@ internal fun ChatRoute(
             MessageInput(
                 isResultPending = chatUiState.messages.lastOrNull()?.isPending ?: false && chatUiState.messages.lastOrNull()?.participant == Role.YOU,
                 onSendMessage = { inputText, selectedItems ->
-                    chatViewModel.sendMessage(context, inputText, selectedItems.map {
-                        it.toString()
-                    })
+                    chatViewModel.sendMessage(
+                        context,
+                        inputText,
+                        groupId = groupId,
+                        selectedItems.map {
+                            it.toString()
+                        })
                 },
                 speakLauncher = speakLauncher,
                 userMessage = userMessage,
@@ -218,8 +235,7 @@ fun ChatBubbleItem(
     chatMessage: ChatMessage,
 ) {
     val context = LocalContext.current
-    val isGEMINIMessage = chatMessage.participant == Role.GEMINI ||
-            chatMessage.participant == Role.ERROR
+    val isGEMINIMessage = chatMessage.participant == Role.GEMINI || chatMessage.participant == Role.ERROR
 
     val backgroundColor = when (chatMessage.participant) {
         Role.GEMINI -> MaterialTheme.colorScheme.primaryContainer
@@ -282,7 +298,7 @@ fun ChatBubbleItem(
                             }
                         }
                         Text(
-                            text = chatMessage.text,
+                            text = formatCode2(chatMessage.text),
                             modifier = Modifier.padding(16.dp)
                         )
                         Row(
@@ -458,43 +474,68 @@ fun MessageInput(
     }
 }
 
-
 @Composable
-fun CodeText(text: String) {
-    val codePattern = Regex("""```[^\n]*\n.*?\n```""", RegexOption.DOT_MATCHES_ALL)
-    val matches = codePattern.findAll(text)
-
-    var currentIndex = 0
-    val annotatedString = AnnotatedString.Builder()
-
-    for (match in matches) {
-        // Append text before the code block
-        annotatedString.append(text.substring(currentIndex, match.range.first))
-
-        // Append the code block with a specific style
-        annotatedString.pushStyle(SpanStyle(color = Color.Blue))
-//        val s = match.value.substring(
-//            annotatedString.length, annotatedString.length + match.value.length
-//        )
-        annotatedString.withStyle(style = ParagraphStyle(lineHeight = 50.sp)) {
-            annotatedString.append(
-                match.value
-            )
-            annotatedString.pop()
+fun CodeDetection(text: AnnotatedString): AnnotatedString {
+    val codeRegex = """```([\s\S]*?)```""".toRegex()
+    val annotatedString = buildAnnotatedString {
+        val matches = codeRegex.findAll(text)
+        var lastIndex = 0
+        matches.forEach { result ->
+            val startIndex = result.range.first
+            val endIndex = result.range.last + 1
+            if (startIndex > lastIndex) {
+                append(text.substring(lastIndex, startIndex))
+            }
+            withStyle(SpanStyle(color = Color.Blue)) {
+                append(text.substring(startIndex + 3, endIndex - 3))
+            }
+            lastIndex = endIndex
         }
-        currentIndex = match.range.last + 1
+        if (lastIndex < text.length) {
+            append(text.substring(lastIndex))
+        }
     }
-
-    // Append the remaining text after the last code block
-    annotatedString.append(text.substring(currentIndex))
-
-    SelectionContainer {
-        Text(text = annotatedString.toAnnotatedString())
-    }
+    return annotatedString
 }
 
-@Composable
-@Preview(showBackground = true)
-fun CodeTextPreview() {
-    CodeText("This is a code block:\n\n```kotlin\nfun main() {\n   println(\"Hello, Jetpack Compose!\")\n}\n```")
+fun formatCode2(text: String): AnnotatedString {
+    val boldRegex = """\*\*(.*?)\*\*""".toRegex()
+    val codeRegex = """```([\s\S]*?)```""".toRegex()
+    val annotatedString = buildAnnotatedString {
+        var lastIndex = 0
+        val matches = boldRegex.findAll(text) + codeRegex.findAll(text)
+        matches.sortedBy { it.range.first }.forEach { matchResult ->
+            // Apply style based on the matched pattern
+            val startIndex = matchResult.range.first
+            val endIndex = matchResult.range.last + 1
+            if (startIndex > lastIndex) {
+                // Append regular text
+                append(text.substring(lastIndex, startIndex))
+            }
+            if (matchResult.groupValues.size >= 2) {
+                // Handle bold text
+                if (matchResult.value.startsWith("**") && matchResult.value.endsWith("**")) {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(matchResult.groupValues[1])
+                    }
+                }
+                // Handle code block
+                else if (matchResult.value.startsWith("```") && matchResult.value.endsWith("```")) {
+                    withStyle(
+                        style = SpanStyle(
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color.Blue
+                        )
+                    ) {
+                        append(matchResult.groupValues[1])
+                    }
+                }
+            }
+            lastIndex = endIndex
+        }
+        if (lastIndex < text.length) {
+            append(text.substring(lastIndex))
+        }
+    }
+    return annotatedString
 }
