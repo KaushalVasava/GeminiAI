@@ -10,6 +10,9 @@ Download App from apk folder.
 - Get information in a conversational format
 - Simple Clean UI with Animations
 - Voice input for AI Chat
+- Code and bold text formatting
+- Multi images chat
+- copy and share support
 
 # Technologies:
 - Kotlin 
@@ -19,14 +22,15 @@ Download App from apk folder.
 - Coil for Image loading
 - Generative AI for All AI related stuff
 - MVVM architecture
+- Image picker
   
 # Screenshots
-![7](https://github.com/KaushalVasava/GeminiAI/assets/49050597/5c5a7d7f-85ec-4db5-a2c7-3a3bfae84fd5)
-![8](https://github.com/KaushalVasava/GeminiAI/assets/49050597/407d746e-543d-4e1c-a43b-4e976e2bbef4)
+![APP MANAGER AND QUICK LAUNCHER (1)](https://github.com/KaushalVasava/GeminiAI/assets/49050597/4419ad45-c600-4cb2-9dec-0676f7eeaa25)
 
 # Video
 
-https://github.com/KaushalVasava/GeminiAI/assets/49050597/4e1227bf-364e-4efb-b547-f3cec02fefd1
+https://github.com/KaushalVasava/GeminiAI/assets/49050597/b6f16d18-9f00-4ca2-8939-347d9ff47c16
+
 
 # Docs
 https://android-developers.googleblog.com/2023/12/leverage-generative-ai-in-your-android-apps.html
@@ -35,7 +39,7 @@ https://android-developers.googleblog.com/2023/12/leverage-generative-ai-in-your
 You can contribute this project. Just Solve issue or update code and raise PR. I'll do code review and merge your changes into main branch. See Commit message guidelines https://initialcommit.com/blog/git-commit-messages-best-practices
 
 # Licence
-Copyright 2023 Kaushal Vasava
+Copyright 2024 Kaushal Vasava
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
