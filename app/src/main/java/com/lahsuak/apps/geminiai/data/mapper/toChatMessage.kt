@@ -4,24 +4,27 @@ import com.lahsuak.apps.geminiai.data.model.ChatMessageEntity
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
 import java.util.Date
 
-
 fun ChatMessageEntity.toChatMessage(): ChatMessage {
     return ChatMessage(
         isPending = isPending,
         text = text,
         participant = role,
-        id = id
+        id = id,
+        cId = cId,
+        imageUris = imageUris
     )
 }
 
 fun ChatMessage.toChatMessageEntity(): ChatMessageEntity {
     return ChatMessageEntity(
+        cId = cId,
         id = id,
-        text = text,
         role = participant,
+        text = text,
         time = Date(),
         isMine = false,
+        isFavorite = false,
         isPending = isPending,
-        isFavorite = false
+        imageUris = imageUris
     )
 }

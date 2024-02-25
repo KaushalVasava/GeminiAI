@@ -1,7 +1,9 @@
 package com.lahsuak.apps.geminiai.repo
 
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.BlockThreshold
 import com.google.ai.client.generativeai.type.GenerationConfig
+import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.generationConfig
 import com.lahsuak.apps.geminiai.BuildConfig

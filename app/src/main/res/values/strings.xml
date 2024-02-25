@@ -34,8 +34,8 @@
     <string name="delete_chat">Clear chat history</string>
     <string name="confirm_delete">Do you want to delete all chat?</string>
     <string name="share">Share</string>
-    <string name="copy">Copy answer</string>
-    <string name="text_copied">Answer copied</string>
+    <string name="copy">Copy</string>
+    <string name="text_copied">copied</string>
     <string name="share_by">Share by</string>
     <string name="remove_image">Remove image</string>
 </resources>
