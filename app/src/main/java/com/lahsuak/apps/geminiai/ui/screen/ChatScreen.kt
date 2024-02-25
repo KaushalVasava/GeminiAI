@@ -65,6 +65,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -338,10 +339,10 @@ fun MessageInput(
     val context = LocalContext.current
     val imageUris = rememberSaveable(saver = UriSaver()) { mutableStateListOf() }
     val pickMedia = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
+        ActivityResultContracts.PickMultipleVisualMedia()
     ) { imageUri ->
-        imageUri?.let {
-            imageUris.add(it)
+        imageUri.let {
+            imageUris.addAll(it)
         }
     }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -355,13 +356,14 @@ fun MessageInput(
     ElevatedCard(Modifier.fillMaxWidth()) {
         Column {
             LazyRow(
-                modifier = Modifier.padding(all = 8.dp)
+                modifier = Modifier.padding(vertical = 2.dp, horizontal = 12.dp)
             ) {
                 items(imageUris) { imageUri ->
                     Box {
                         AsyncImage(
                             model = imageUri,
                             contentDescription = null,
+                            contentScale = ContentScale.FillBounds,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .requiredSize(72.dp)
