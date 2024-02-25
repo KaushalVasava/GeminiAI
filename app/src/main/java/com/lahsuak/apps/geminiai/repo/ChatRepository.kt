@@ -9,21 +9,15 @@ interface ChatRepository {
 
     fun getAllGroups(): Flow<List<GroupEntity>>
 
-    suspend fun insertChatsInGroup(
-        groupEntity: GroupEntity,
-    )
+    suspend fun insertChatsInGroup(groupEntity: GroupEntity)
 
-    suspend fun updateChatsInGroup(
-        groupEntity: GroupEntity,
-    )
+    suspend fun updateChatsInGroup(groupEntity: GroupEntity)
 
     suspend fun getById(groupId: Int): GroupEntity
 
     fun getAllChatMessages(id: String): Flow<List<ChatMessage>>
 
-    suspend fun insertSingleMessage(
-        chatMessageEntity: ChatMessageEntity,
-    )
+    suspend fun insertSingleMessage(chatMessageEntity: ChatMessageEntity)
 
-    suspend fun clearChat()
+    suspend fun deleteChats(groupId: String)
 }

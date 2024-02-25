@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.Flow
 interface ChatDao {
 
     @Upsert
-//        (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatsInGroup(group: GroupEntity)
 
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateChatsInGroup(group: GroupEntity)
+
+    @Query("DELETE FROM group_table WHERE id=:groupId")
+    suspend fun deleteChatMessages(groupId: String)
 
     @Query("SELECT * FROM group_table")
     fun getAllGroups(): Flow<List<GroupEntity>>
@@ -27,9 +29,6 @@ interface ChatDao {
 
     @Upsert
     suspend fun insertSingleMessage(chatMessage: ChatMessageEntity)
-
-    @Query("DELETE FROM chat_table")
-    suspend fun deleteAllChatMessages()
 
     @Query("SELECT * FROM chat_table WHERE id=:id")
     fun getAllChatMessage(id: String): Flow<List<ChatMessageEntity>>

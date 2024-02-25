@@ -8,9 +8,6 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Precision
-import com.google.ai.client.generativeai.type.BlockThreshold
-import com.google.ai.client.generativeai.type.HarmCategory
-import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.lahsuak.apps.geminiai.data.mapper.toChatMessageEntity
 import com.lahsuak.apps.geminiai.repo.ChatRepository
@@ -27,7 +24,7 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel(
     private val geminiAIRepo: GeminiAIRepo,
-    private val chatRepository: ChatRepository,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
     private val generativeModel = geminiAIRepo.getGenerativeModel(
         "gemini-pro",
@@ -47,9 +44,9 @@ class ChatViewModel(
         }
     }
 
-    fun clearChat() {
-        viewModelScope.launch {
-            chatRepository.clearChat()
+    fun deleteChat(groupId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.deleteChats(groupId)
             _uiState.value = ChatUiState()
         }
     }
@@ -61,7 +58,6 @@ class ChatViewModel(
         selectedImages: List<String>,
     ) {
         // Add a pending message
-
         viewModelScope.launch(Dispatchers.IO) {
             val imageRequestBuilder = ImageRequest.Builder(context)
             val imageLoader = ImageLoader.Builder(context).build()

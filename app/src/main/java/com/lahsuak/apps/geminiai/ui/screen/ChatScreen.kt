@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,7 +64,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -82,7 +83,6 @@ import com.google.ai.sample.util.UriSaver
 import com.lahsuak.apps.geminiai.R
 import com.lahsuak.apps.geminiai.data.mapper.toChatMessageEntity
 import com.lahsuak.apps.geminiai.data.model.ChatMessageEntity
-import com.lahsuak.apps.geminiai.ui.component.AnimatedBorderCard
 import com.lahsuak.apps.geminiai.ui.component.RoundedTextField
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
 import com.lahsuak.apps.geminiai.ui.model.Role
@@ -137,7 +137,7 @@ internal fun ChatRoute(
             },
             confirmButton = {
                 Button(onClick = {
-                    chatViewModel.clearChat()
+                    chatViewModel.deleteChat(groupId)
                     openDialog = false
                 }) {
                     Text(stringResource(R.string.delete))
@@ -235,7 +235,8 @@ fun ChatBubbleItem(
     chatMessage: ChatMessage,
 ) {
     val context = LocalContext.current
-    val isGEMINIMessage = chatMessage.participant == Role.GEMINI || chatMessage.participant == Role.ERROR
+    val isGEMINIMessage =
+        chatMessage.participant == Role.GEMINI || chatMessage.participant == Role.ERROR
 
     val backgroundColor = when (chatMessage.participant) {
         Role.GEMINI -> MaterialTheme.colorScheme.primaryContainer
@@ -267,19 +268,14 @@ fun ChatBubbleItem(
         )
         Row {
             BoxWithConstraints {
-                AnimatedBorderCard(
-                    animationDuration = 2000,
+                Card(
                     shape = bubbleShape,
-                    containerColor = backgroundColor,
+                    colors = CardDefaults.cardColors(
+                        backgroundColor
+                    ),
                     modifier = Modifier
                         .padding(1.dp)
-                        .widthIn(0.dp, maxWidth * 0.9f),
-                    gradient = Brush.linearGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background
-                        )
-                    )
+                        .widthIn(0.dp, maxWidth * 0.9f)
                 ) {
                     Column {
                         LazyRow(
@@ -298,7 +294,7 @@ fun ChatBubbleItem(
                             }
                         }
                         Text(
-                            text = formatCode2(chatMessage.text),
+                            text = formatCode(chatMessage.text),
                             modifier = Modifier.padding(16.dp)
                         )
                         Row(
@@ -475,30 +471,7 @@ fun MessageInput(
 }
 
 @Composable
-fun CodeDetection(text: AnnotatedString): AnnotatedString {
-    val codeRegex = """```([\s\S]*?)```""".toRegex()
-    val annotatedString = buildAnnotatedString {
-        val matches = codeRegex.findAll(text)
-        var lastIndex = 0
-        matches.forEach { result ->
-            val startIndex = result.range.first
-            val endIndex = result.range.last + 1
-            if (startIndex > lastIndex) {
-                append(text.substring(lastIndex, startIndex))
-            }
-            withStyle(SpanStyle(color = Color.Blue)) {
-                append(text.substring(startIndex + 3, endIndex - 3))
-            }
-            lastIndex = endIndex
-        }
-        if (lastIndex < text.length) {
-            append(text.substring(lastIndex))
-        }
-    }
-    return annotatedString
-}
-
-fun formatCode2(text: String): AnnotatedString {
+fun formatCode(text: String): AnnotatedString {
     val boldRegex = """\*\*(.*?)\*\*""".toRegex()
     val codeRegex = """```([\s\S]*?)```""".toRegex()
     val annotatedString = buildAnnotatedString {
@@ -524,7 +497,7 @@ fun formatCode2(text: String): AnnotatedString {
                     withStyle(
                         style = SpanStyle(
                             fontFamily = FontFamily.SansSerif,
-                            color = Color.Blue
+                            color = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         append(matchResult.groupValues[1])

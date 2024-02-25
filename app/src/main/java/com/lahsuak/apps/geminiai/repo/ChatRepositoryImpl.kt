@@ -37,7 +37,7 @@ class ChatRepositoryImpl(
         dao.insertSingleMessage(chatMessageEntity)
     }
 
-    override suspend fun clearChat() {
-        dao.deleteAllChatMessages()
+    override suspend fun deleteChats(groupId: String) {
+        dao.deleteChatMessages(groupId)
     }
 }
