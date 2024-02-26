@@ -1,6 +1,6 @@
 It is a Gemini AI application where you can get information from text, image and get info. in a conversational format. 
 
-Download App from apk folder.
+Download App from the release section
 
 ![ic_launcher-playstore](https://github.com/KaushalVasava/GeminiAI/assets/49050597/2a9fab2b-659d-4d3d-a72d-19054a4dce66)
 
