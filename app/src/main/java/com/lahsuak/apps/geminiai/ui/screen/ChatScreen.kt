@@ -84,6 +84,7 @@ import com.google.ai.sample.util.UriSaver
 import com.lahsuak.apps.geminiai.R
 import com.lahsuak.apps.geminiai.data.mapper.toChatMessageEntity
 import com.lahsuak.apps.geminiai.data.model.ChatMessageEntity
+import com.lahsuak.apps.geminiai.ui.component.LinkifyText
 import com.lahsuak.apps.geminiai.ui.component.RoundedTextField
 import com.lahsuak.apps.geminiai.ui.model.ChatMessage
 import com.lahsuak.apps.geminiai.ui.model.Role
@@ -294,9 +295,9 @@ fun ChatBubbleItem(
                                 }
                             }
                         }
-                        Text(
-                            text = formatCode(chatMessage.text),
-                            modifier = Modifier.padding(16.dp)
+                        LinkifyText(text = formatCode(chatMessage.text),
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Row(
                             Modifier.fillMaxWidth(),
@@ -431,6 +432,7 @@ fun MessageInput(
                             onSendMessage(userMessage, imageUris)
                             onValueChange("")
                             resetScroll()
+                            keyboard?.hide()
                             isMessageSent = true
                         } else {
                             context.speakToAdd(speakLauncher)

@@ -26,6 +26,7 @@ data class ChatMessageEntity(
 
 class ListConverters {
     private var gson: Gson = Gson()
+
     @TypeConverter
     fun stringToStringList(data: String): List<String> {
         val listType = object : TypeToken<List<String>>() {}.type

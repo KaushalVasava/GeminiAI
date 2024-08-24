@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.lahsuak.apps.geminiai.ui.screen.ChatRoute
 import com.lahsuak.apps.geminiai.ui.screen.MenuScreen
 import com.lahsuak.apps.geminiai.ui.theme.GeminiAITheme
