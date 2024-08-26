@@ -118,7 +118,7 @@ class ChatViewModel(
                     }
 
                     val generativeModel = geminiAIRepo.getGenerativeModel(
-                        "gemini-pro-vision",
+                        "gemini-1.5-flash",
                         geminiAIRepo.provideConfig()
                     )
                     var outputContent = ""
